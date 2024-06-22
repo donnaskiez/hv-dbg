@@ -571,6 +571,12 @@ VirtualizeCore(_In_ PDPC_CALL_CONTEXT Context, _In_ PVOID StackPointer)
                 return;
         }
 
+        /*
+         * Now this isnt a perfect solution, but for now we store the current
+         * register state and use it to initialise our host debug state.
+         */
+        StoreHostDebugRegisterState();
+
 #if APIC
         InitialiseVirtualApicPage(vcpu);
 #endif

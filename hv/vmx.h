@@ -68,28 +68,28 @@ typedef struct _VCPU_LOG_STATE {
 } VCPU_LOG_STATE, *PVCPU_LOG_STATE;
 
 typedef struct _GUEST_CONTEXT {
-        //UINT64 dr7;
-        //UINT64 dr6;
-        //UINT64 dr3;
-        //UINT64 dr2;
-        //UINT64 dr1;
-        //UINT64 dr0;
-        //M128A  Xmm0;
-        //M128A  Xmm1;
-        //M128A  Xmm2;
-        //M128A  Xmm3;
-        //M128A  Xmm4;
-        //M128A  Xmm5;
-        //M128A  Xmm6;
-        //M128A  Xmm7;
-        //M128A  Xmm8;
-        //M128A  Xmm9;
-        //M128A  Xmm10;
-        //M128A  Xmm11;
-        //M128A  Xmm12;
-        //M128A  Xmm13;
-        //M128A  Xmm14;
-        //M128A  Xmm15;
+        UINT64 dr7;
+        UINT64 dr6;
+        UINT64 dr3;
+        UINT64 dr2;
+        UINT64 dr1;
+        UINT64 dr0;
+        M128A  Xmm0;
+        M128A  Xmm1;
+        M128A  Xmm2;
+        M128A  Xmm3;
+        M128A  Xmm4;
+        M128A  Xmm5;
+        M128A  Xmm6;
+        M128A  Xmm7;
+        M128A  Xmm8;
+        M128A  Xmm9;
+        M128A  Xmm10;
+        M128A  Xmm11;
+        M128A  Xmm12;
+        M128A  Xmm13;
+        M128A  Xmm14;
+        M128A  Xmm15;
         UINT64 rax;
         UINT64 rcx;
         UINT64 rdx;
@@ -109,6 +109,8 @@ typedef struct _GUEST_CONTEXT {
         UINT64 rflags;
 
 } GUEST_CONTEXT, *PGUEST_CONTEXT;
+
+static_assert(sizeof(GUEST_CONTEXT) == 0x01c0, "sizeof(GUEST_CONTEXT) not valid.");
 
 typedef struct _MSR_BITMAP {
         UINT8 msr_low_read[1000];

@@ -155,8 +155,7 @@ VmcsWriteHostStateFields(_In_ PVIRTUAL_MACHINE_STATE GuestState)
         VmxVmWrite(VMCS_HOST_GDTR_BASE, gdtr.BaseAddress);
         VmxVmWrite(VMCS_HOST_IDTR_BASE, idtr.BaseAddress);
 
-        VmxVmWrite(VMCS_HOST_RSP,
-                   GuestState->vmm_stack_va + VMX_HOST_STACK_SIZE);
+        VmxVmWrite(VMCS_HOST_RSP, GuestState->vmm_stack_va);
         VmxVmWrite(VMCS_HOST_RIP, VmExitHandler);
 
         VmxVmWrite(VMCS_HOST_FS_BASE, __readmsr(IA32_FS_BASE));

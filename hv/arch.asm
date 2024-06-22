@@ -116,23 +116,23 @@ endm
 
 SAVE_FP macro
 
-	sub     rsp, 256
-	vmovups  xmmword ptr [rsp +  0h], xmm0
-	vmovups  xmmword ptr [rsp + 10h], xmm1
-	vmovups  xmmword ptr [rsp + 20h], xmm2
-	vmovups  xmmword ptr [rsp + 30h], xmm3
-	vmovups  xmmword ptr [rsp + 40h], xmm4
-	vmovups  xmmword ptr [rsp + 50h], xmm5
-	vmovups  xmmword ptr [rsp + 60h], xmm6
-	vmovups  xmmword ptr [rsp + 70h], xmm7
-	vmovups  xmmword ptr [rsp + 80h], xmm8
-	vmovups  xmmword ptr [rsp + 90h], xmm9
-	vmovups  xmmword ptr [rsp + 160], xmm10
-	vmovups  xmmword ptr [rsp + 176], xmm11
-	vmovups  xmmword ptr [rsp + 192], xmm12
-	vmovups  xmmword ptr [rsp + 208], xmm13
-	vmovups  xmmword ptr [rsp + 224], xmm14
-	vmovups  xmmword ptr [rsp + 240], xmm15
+    sub     rsp, 256
+    vmovups xmmword ptr [rsp +  0h], xmm0
+    vmovups xmmword ptr [rsp + 10h], xmm1
+    vmovups xmmword ptr [rsp + 20h], xmm2
+    vmovups xmmword ptr [rsp + 30h], xmm3
+    vmovups xmmword ptr [rsp + 40h], xmm4
+    vmovups xmmword ptr [rsp + 50h], xmm5
+    vmovups xmmword ptr [rsp + 60h], xmm6
+    vmovups xmmword ptr [rsp + 70h], xmm7
+    vmovups xmmword ptr [rsp + 80h], xmm8
+    vmovups xmmword ptr [rsp + 90h], xmm9
+    vmovups xmmword ptr [rsp + 160], xmm10
+    vmovups xmmword ptr [rsp + 176], xmm11
+    vmovups xmmword ptr [rsp + 192], xmm12
+    vmovups xmmword ptr [rsp + 208], xmm13
+    vmovups xmmword ptr [rsp + 224], xmm14
+    vmovups xmmword ptr [rsp + 240], xmm15
 
 endm
 
@@ -142,23 +142,23 @@ endm
 
 RESTORE_FP macro
 
-	vmovups  xmm0, xmmword ptr [rsp +  0h]
-	vmovups  xmm1, xmmword ptr [rsp + 10h]
-	vmovups  xmm2, xmmword ptr [rsp + 20h]
-	vmovups  xmm3, xmmword ptr [rsp + 30h]
-	vmovups  xmm4, xmmword ptr [rsp + 40h]
-	vmovups  xmm5, xmmword ptr [rsp + 50h]
-	vmovups  xmm6, xmmword ptr [rsp + 60h]
-	vmovups  xmm7, xmmword ptr [rsp + 70h]
-	vmovups  xmm8, xmmword ptr [rsp + 80h]
-	vmovups  xmm9, xmmword ptr [rsp + 90h]
-	vmovups  xmm10, xmmword ptr [rsp + 160]
-	vmovups  xmm11, xmmword ptr [rsp + 176]
-	vmovups  xmm12, xmmword ptr [rsp + 192]
-	vmovups  xmm13, xmmword ptr [rsp + 208]
-	vmovups  xmm14, xmmword ptr [rsp + 224]
-	vmovups  xmm15, xmmword ptr [rsp + 240]
-	add     rsp, 256
+    vmovups xmm0, xmmword ptr [rsp +  0h]
+    vmovups xmm1, xmmword ptr [rsp + 10h]
+    vmovups xmm2, xmmword ptr [rsp + 20h]
+    vmovups xmm3, xmmword ptr [rsp + 30h]
+    vmovups xmm4, xmmword ptr [rsp + 40h]
+    vmovups xmm5, xmmword ptr [rsp + 50h]
+    vmovups xmm6, xmmword ptr [rsp + 60h]
+    vmovups xmm7, xmmword ptr [rsp + 70h]
+    vmovups xmm8, xmmword ptr [rsp + 80h]
+    vmovups xmm9, xmmword ptr [rsp + 90h]
+    vmovups xmm10, xmmword ptr [rsp + 160]
+    vmovups xmm11, xmmword ptr [rsp + 176]
+    vmovups xmm12, xmmword ptr [rsp + 192]
+    vmovups xmm13, xmmword ptr [rsp + 208]
+    vmovups xmm14, xmmword ptr [rsp + 224]
+    vmovups xmm15, xmmword ptr [rsp + 240]
+    add     rsp, 256
 
 endm
 
@@ -229,7 +229,8 @@ VmExitHandler PROC
 
 	pushfq
 	SAVE_GP	
-	; SAVE_DEBUG
+	SAVE_FP
+	SAVE_DEBUG
 
 	; Load the saved host debug register state after saving the guest 
 	; debug register state. This ensures 2 things:
@@ -238,9 +239,9 @@ VmExitHandler PROC
 	;	2. The continuous debug state remains valid across vmexits
 	;	   and entries. (mostly)
 
-	; sub rsp, 20h
-	; call LoadHostDebugRegisterState
-	; add rsp, 20h
+	sub rsp, 20h
+	call LoadHostDebugRegisterState
+	add rsp, 20h
 
 	; first argument for our exit handler is the guest register state, 
 	; so store the base of the stack in rcx
@@ -259,13 +260,15 @@ VmExitHandler PROC
 	; the guests debug register state. This will allow us to reload the host
 	; debug state on the next vmexit.
 
-	; sub rsp, 20h
-	; call StoreHostDebugRegisterState
-	; add rsp, 20h
+	sub rsp, 20h
+	call StoreHostDebugRegisterState
+	add rsp, 20h
 
-	; RESTORE_DEBUG
+	RESTORE_DEBUG
+	RESTORE_FP
 	RESTORE_GP			
-	popfq				
+	popfq			
+
 	vmresume					
 	
 VmExitHandler ENDP
@@ -313,12 +316,13 @@ ExitVmx PROC
 	sub rsp, 020h 
 	call VmmReadGuestRsp
 	add rsp, 020h
-	mov [rsp+88h], rax
+	mov [rsp+01c0h], rax
+
 	sub rsp, 020h
 	call VmmReadGuestRip
 	add rsp, 020h
 	mov rdx, rsp
-	mov rbx, [rsp+88h]
+	mov rbx, [rsp+01c0h]
 	mov rsp, rbx
 	push rax
 
@@ -327,11 +331,14 @@ ExitVmx PROC
 
 	mov rsp, rdx			                 
 	sub rbx,08h			
-	mov [rsp+88h], rbx	
-	; RESTORE_DEBUG
+	mov [rsp+01c0h], rbx	
+
+	RESTORE_DEBUG
+	RESTORE_FP
 	RESTORE_GP			
-	popfq				
-	pop rsp				
+	popfq		
+	pop rsp		
+	
 	ret				
 
 ExitVmx ENDP
@@ -360,9 +367,8 @@ ExitVmx ENDP
 SaveStateAndVirtualizeCore PROC PUBLIC
 
 	SAVE_GP
-	; SAVE_DEBUG
-
-	; call StoreHostDebugRegisterState
+	SAVE_FP
+	SAVE_DEBUG
 
 	sub rsp, 28h
 	mov rdx, rsp
@@ -401,9 +407,8 @@ VmxRestoreState PROC
 	call VmmGetCoresVcpu
 	mov [rax], dword ptr VMX_VCPU_STATE_RUNNING
 
-	; call StoreHostDebugRegisterState
-
-	; RESTORE_DEBUG
+	RESTORE_DEBUG
+	RESTORE_FP
 	RESTORE_GP
 	ret
 	
